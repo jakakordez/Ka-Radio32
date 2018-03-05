@@ -192,104 +192,35 @@ function dtime() {
 	if ((!isNaN(eltw.innerHTML))&&(eltw.innerHTML == 0)) eltw.innerHTML = "0";
 }
 
-function labelSleep(label){
-	document.getElementById('sminutes').innerHTML = label;	
-}
-function sleepup(e)
-{
-	if (e.keyCode == 13) startSleep();
-}
-function startSleep(){
-	var valm,h0,h1;
-	var cur = new Date();
-	var hop = document.getElementById("sleepdelay").value.split(":");
-	h0 = parseInt(hop[0],10);
-	h1 = parseInt(hop[1],10);
-	if(!isNaN(h0)){
-		if (!isNaN(h1)) // time mode
-		{
-			fut = new Date(cur.getFullYear(),cur.getMonth(), cur.getDate(),h0,h1,0 );
-			if (fut.getTime() > cur.getTime())
-				valm = Math.round((fut.getTime() - cur.getTime())/60000) ; //seconds
-			else valm = 1440 - Math.round((cur.getTime() - fut.getTime())/60000) ; //seconds
-			if (valm == 0)
-			if (fut.getTime() > cur.getTime() )   valm = 1; // 1 minute mini
-			else valm = 1440;
-		} else valm = h0; // minute mode
-		websocket.send("startSleep=" +valm +"&");
-		labelSleep("Started, Good night!");
-		window.setTimeout(labelSleep, 2000 ,(valm*60)-2);	
-	} else
-	{
-		labelSleep("Error, try again");
-		window.setTimeout(labelSleep, 2000 ,"0");
-	}	
+function disableAlarm(){
+	websocket.send("disableAlarm");
+	labelAlarm("Disabled");
 }
 
-function stopSleep(){
-	var a = document.getElementById("sleepdelay").value;
-    websocket.send("stopSleep");
-    labelSleep("0");
-//    window.setTimeout(labelSleep, 2000, a);	
+function labelAlarm(label){
+	document.getElementById('lblAlarm').innerHTML = label;	
 }
 
-function labelWake(label){
-	document.getElementById('wminutes').innerHTML = label;	
-}
-function wakeup(e)
+function alarmup(e)
 {
-	if (e.keyCode == 13) startWake();
-}
-function startWake(){
-	var valm,h0,h1;
-	var cur = new Date();
-	var hop = document.getElementById("wakedelay").value.split(":");
-	h0 = parseInt(hop[0],10);
-	h1 = parseInt(hop[1],10);
-	if(!isNaN(h0)){
-		if (!isNaN(h1)) // time mode
-		{
-			fut = new Date(cur.getFullYear(),cur.getMonth(), cur.getDate(),h0,h1,0 );
-			if (fut.getTime() > cur.getTime())
-				valm = Math.round((fut.getTime() - cur.getTime())/60000) ; //seconds
-			else valm = 1440 - Math.round((cur.getTime() - fut.getTime())/60000) ; //seconds
-			if (valm == 0)
-			if (fut.getTime() > cur.getTime() )   valm = 1; // 1 minute mini
-			else valm = 1440;
-		} else valm = h0; // minute mode
-		websocket.send("startWake=" +valm +"&");
-		labelWake("Started");
-		window.setTimeout(labelWake, 2000 ,(valm*60)-2);	
-	} else
-	{
-		labelWake("Error, try again");
-		window.setTimeout(labelWake, 2000 ,"0");
-	}	
+	if (e.keyCode == 13) setAlarm();
 }
 
 function setAlarm(){
 	var valm,h0,h1;
 	var cur = new Date();
-	var hop = document.getElementById("wakedelay").value.split(":");
+	var hop = document.getElementById("alarmtime").value.split(":");
 	h0 = parseInt(hop[0],10);
 	h1 = parseInt(hop[1],10);
-	if(!isNaN(h0) && !isNaN(h1)){
+	if(!isNaN(h0) && !isNaN(h1)){	
 		valm = (h0*60)+h1;
 		websocket.send("setAlarm=" +valm +"&");
-		labelWake("Started");
+		labelAlarm("Alarm set");
 	} else
 	{
-		labelWake("Error, try again");
+		labelAlarm("Error, try again");
 	}	
 }
-
-function stopWake(){
-	var a = document.getElementById("wakedelay").value;
-    websocket.send("stopWake");
-    labelWake("0");
-}
-
-
 
 function promptworking(label) {
 	document.getElementById('meta').innerHTML = label;

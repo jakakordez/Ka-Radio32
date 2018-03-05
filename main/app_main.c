@@ -158,60 +158,6 @@ IRAM_ATTR void   msCallback(void *pArg) {
 	TIMERG1.hw_timer[timer_idx].config.alarm_en = 1;
 }
 
-IRAM_ATTR void   sleepCallback(void *pArg) {
-	int timer_idx = (int) pArg;
-	queue_event_t evt;	
-	TIMERG0.int_clr_timers.t0 = 1; //isr ack
-		evt.type = TIMER_SLEEP;
-        evt.i1 = TIMERGROUP;
-        evt.i2 = timer_idx;
-	xQueueSendFromISR(event_queue, &evt, NULL);	
-	TIMERG0.hw_timer[timer_idx].config.alarm_en = 0;
-}
-IRAM_ATTR void   wakeCallback(void *pArg) {
-
-	int timer_idx = (int) pArg;
-	queue_event_t evt;	
-	TIMERG0.int_clr_timers.t1 = 1;
-        evt.i1 = TIMERGROUP;
-        evt.i2 = timer_idx;
-		evt.type = TIMER_WAKE;
-	xQueueSendFromISR(event_queue, &evt, NULL);
-	TIMERG0.hw_timer[timer_idx].config.alarm_en = 0;
-}
-
-
-void startSleep(uint32_t delay)
-{
-	ESP_LOGD(TAG,"Delay:%d\n",delay);
-	if (delay == 0) return;
-	ESP_ERROR_CHECK(timer_set_counter_value(TIMERGROUP, sleepTimer, 0x00000000ULL));
-	ESP_ERROR_CHECK(timer_set_alarm_value(TIMERGROUP, sleepTimer,TIMERVALUE(delay*60)));
-	ESP_ERROR_CHECK(timer_enable_intr(TIMERGROUP, sleepTimer));
-	ESP_ERROR_CHECK(timer_set_alarm(TIMERGROUP, sleepTimer,TIMER_ALARM_EN));
-	ESP_ERROR_CHECK(timer_start(TIMERGROUP, sleepTimer));
-}
-void stopSleep(){
-	ESP_LOGD(TAG,"stopDelayDelay\n");
-	ESP_ERROR_CHECK(timer_pause(TIMERGROUP, sleepTimer));
-}
-void startWake(uint32_t delay)
-{
-	ESP_LOGD(TAG,"Wake Delay:%d\n",delay);
-	if (delay == 0) return;
-	ESP_ERROR_CHECK(timer_set_counter_value(TIMERGROUP, wakeTimer, 0x00000000ULL));
-	//TIMER_INTERVAL0_SEC * TIMER_SCALE - TIMER_FINE_ADJ
-	ESP_ERROR_CHECK(timer_set_alarm_value(TIMERGROUP, wakeTimer,TIMERVALUE(delay*60)));
-	ESP_ERROR_CHECK(timer_enable_intr(TIMERGROUP, wakeTimer));
-	ESP_ERROR_CHECK(timer_set_alarm(TIMERGROUP, wakeTimer,TIMER_ALARM_EN));
-	ESP_ERROR_CHECK(timer_start(TIMERGROUP, wakeTimer));	
-}
-void stopWake(){
-	ESP_LOGD(TAG,"stopDelayWake\n");
-	ESP_ERROR_CHECK(timer_pause(TIMERGROUP, wakeTimer));
-}
-
-
 void initTimers()
 {
 timer_config_t config;
@@ -222,14 +168,6 @@ timer_config_t config;
     config.intr_type = TIMER_INTR_LEVEL;
     config.counter_en = TIMER_PAUSE;
 	
-	/*Configure timer sleep*/
-    ESP_ERROR_CHECK(timer_init(TIMERGROUP, sleepTimer, &config));
-	ESP_ERROR_CHECK(timer_pause(TIMERGROUP, sleepTimer));
-	ESP_ERROR_CHECK(timer_isr_register(TIMERGROUP, sleepTimer, sleepCallback, (void*) sleepTimer, 0, NULL));
-	/*Configure timer wake*/
-    ESP_ERROR_CHECK(timer_init(TIMERGROUP, wakeTimer, &config));
-	ESP_ERROR_CHECK(timer_pause(TIMERGROUP, wakeTimer));
-	ESP_ERROR_CHECK(timer_isr_register(TIMERGROUP, wakeTimer, wakeCallback, (void*) wakeTimer, 0, NULL));	
 	/*Configure timer 1MS*/
 	config.auto_reload = TIMER_AUTORELOAD_EN;
 	config.divider = TIMER_DIVIDER1MS;
@@ -335,8 +273,6 @@ static void init_hardware()
 
     ESP_LOGI(TAG, "hardware initialized");
 }
-
-
 
 /* event handler for pre-defined wifi events */
 static esp_err_t event_handler(void *ctx, system_event_t *event)
@@ -643,12 +579,6 @@ void timerTask(void* p) {
 		while (xQueueReceive(event_queue, &evt, 0))
 		{
 			switch (evt.type){
-					case TIMER_SLEEP:
-						clientDisconnect("Timer"); // stop the player
-					break;
-					case TIMER_WAKE:
-					clientConnect(); // start the player	
-					break;
 					case TIMER_1MS: // 1 ms 
 					  ctime++;	// for led
 					  if (serviceEncoder != NULL) serviceEncoder(); // for the encoder

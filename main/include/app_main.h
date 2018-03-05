@@ -56,17 +56,11 @@
 #define TIMERGROUP1mS TIMER_GROUP_1
 #define msTimer	TIMER_0
 #define microsTimer	TIMER_1
-#define sleepTimer  TIMER_0
-#define wakeTimer TIMER_1
 
-//extern os_timer_t sleepTimer;
 extern uint32_t sleepDelay;
-//extern os_timer_t wakeTimer;
 extern uint32_t wakeDelay;
 
 // event for timers and encoder
-#define TIMER_SLEEP   0   
-#define TIMER_WAKE    1 
 #define TIMER_1MS	2
 #define TIMER_1mS	3
 

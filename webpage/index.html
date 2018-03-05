@@ -114,16 +114,11 @@
 						I'm sorry; your browser doesn't support HTML5 <code>audio</code>.
 				</audio>
 				 
-				<h1>Sleep / Wake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="time">time</span></h1>
+				<h1>Alarm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="time">time</span></h1>
 				<p id="sw">
-					<span class="bold1" title="Time mode: HH:MM, or Delay mode (minutes): MM"> Sleep(i) : </span><input type="text" id="sleepdelay" onkeyup="sleepup(event)"> 
-					&nbsp;<input type="button" value="Start"  onClick="startSleep()"><input type="button" value="Stop"  onClick="stopSleep()">
-					&nbsp;&nbsp;  In: <span id="sminutes">0</span> Sec.
-				</p>
-				<p id="sw">
-					<span class="bold1" title="Time mode: HH:MM, or Delay mode (minutes): MM"> Wake(i) : </span><input type="text" id="wakedelay" onkeyup="wakeup(event)">
-					&nbsp;<input type="button" value="Start"  onClick="setAlarm()"><input type="button" value="Stop"  onClick="stopWake()">
-					 &nbsp;&nbsp; In: <span id="wminutes">0</span> Sec. 
+					<span class="bold1"> Alarm time (HH:MM) : </span><input type="text" id="alarmtime" onkeyup="alarmup(event)">
+					&nbsp;<input type="button" value="Set" onClick="setAlarm()"><input type="button" value="Disable" onClick="disableAlarm()">
+					 &nbsp;&nbsp; <span id="lblAlarm">0</span>
 				</p>
 				<h1>Instant play</h1>
 					<p>

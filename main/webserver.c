@@ -301,22 +301,6 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 		sprintf(answer,"{\"wsvol\":\"%s\"}",payload+6);
 		websocketlimitedbroadcast(socket,answer, strlen(answer));
 	}
-	else if (strstr((char*)payload,"startSleep=")!= NULL)
-	{
-		if (strstr((char*)payload,"&") != NULL)
-			*strstr((char*)payload,"&")=0;
-		else return;
-		startSleep(atoi((char*)payload+11));
-	}
-	else if (strstr((char*)payload,"stopSleep")!= NULL){stopSleep();}
-	else if (strstr((char*)payload,"startWake=")!= NULL)
-	{
-		if (strstr((char*)payload,"&") != NULL)
-			*strstr((char*)payload,"&")=0;
-		else return;
-		startWake(atoi((char*)payload+10));
-	}
-	else if (strstr((char*)payload,"stopWake")!= NULL){stopWake();}
 	else if (strstr((char*)payload,"setAlarm=")!= NULL){
 		kprintf("setAlarm\n");
 		if (strstr((char*)payload,"&") != NULL)
@@ -326,6 +310,7 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 		kprintf("Time: %d\n", t);
 		setAlarm(t);
 	}
+	else if (strstr((char*)payload,"disableAlarm")!= NULL){disableAlarm();}
 	//monitor
 	else if (strstr((char*)payload,"monitor")!= NULL){wsMonitor();}
 	else if (strstr((char*)payload,"upgrade")!= NULL){update_firmware("KaRadio32");	}

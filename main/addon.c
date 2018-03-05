@@ -76,21 +76,37 @@ static bool dvolume = true; // display volume screen
  
 void Screen(typeScreen st); 
 
+enum ALARM_STATE{
+	ALARM_DISABLED,
+	ALARM_SET,
+	ALARM_TRIGGERED
+};
+
 static uint32_t alarmTime;
+static enum ALARM_STATE currentState;
 
 void setAlarm(uint32_t time){
 	alarmTime = time;
+	currentState = ALARM_SET;
+}
+
+void disableAlarm(){
+	currentState = ALARM_DISABLED;
 }
 
 void processAlarm(){
 	dt=localtime(&timestamp);
-	kprintf("processAlarm\n");
 	uint32_t currentTime = (dt->tm_hour*60)+dt->tm_min;
 	if(currentTime == alarmTime){
-		kprintf("Alarm start\n");
-		alarmTime--;
-		setCurrentStation(0);
-		playStationInt(0);
+		if(currentState == ALARM_SET){
+			kprintf("Alarm triggered\n");
+			currentState = ALARM_TRIGGERED;
+			setCurrentStation(0);
+			playStationInt(0);
+		}
+	}
+	else if(currentState == ALARM_TRIGGERED){
+		currentState = ALARM_SET;
 	}
 }
  

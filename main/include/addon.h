@@ -83,5 +83,6 @@ void addonDt();
 void wakeLcd();
 void setAlarm(uint32_t time);
 void processAlarm();
+void disableAlarm();
 
 #endif
