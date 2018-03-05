@@ -267,6 +267,22 @@ function startWake(){
 	}	
 }
 
+function setAlarm(){
+	var valm,h0,h1;
+	var cur = new Date();
+	var hop = document.getElementById("wakedelay").value.split(":");
+	h0 = parseInt(hop[0],10);
+	h1 = parseInt(hop[1],10);
+	if(!isNaN(h0) && !isNaN(h1)){
+		valm = (h0*60)+h1;
+		websocket.send("setAlarm=" +valm +"&");
+		labelWake("Started");
+	} else
+	{
+		labelWake("Error, try again");
+	}	
+}
+
 function stopWake(){
 	var a = document.getElementById("wakedelay").value;
     websocket.send("stopWake");

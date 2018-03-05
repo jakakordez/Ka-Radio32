@@ -653,6 +653,7 @@ void timerTask(void* p) {
 					  ctime++;	// for led
 					  if (serviceEncoder != NULL) serviceEncoder(); // for the encoder
 					  if (serviceAddon != NULL) serviceAddon(); // for the encoder
+					  
 					break;
 					case TIMER_1mS:  //10µs
 					break;

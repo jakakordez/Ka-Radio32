@@ -317,11 +317,22 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 		startWake(atoi((char*)payload+10));
 	}
 	else if (strstr((char*)payload,"stopWake")!= NULL){stopWake();}
+	else if (strstr((char*)payload,"setAlarm=")!= NULL){
+		kprintf("setAlarm\n");
+		if (strstr((char*)payload,"&") != NULL)
+			*strstr((char*)payload,"&")=0;
+		else return;
+		uint32_t t = atoi((char*)payload+9);
+		kprintf("Time: %d\n", t);
+		setAlarm(t);
+	}
 	//monitor
 	else if (strstr((char*)payload,"monitor")!= NULL){wsMonitor();}
 	else if (strstr((char*)payload,"upgrade")!= NULL){update_firmware("KaRadio32");	}
 	else if (strstr((char*)payload,"theme")!= NULL){theme();}
 	else if (strstr((char*)payload,"wsrssi")!= NULL){rssi(socket);}
+
+	
 }
 
 

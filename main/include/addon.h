@@ -81,5 +81,7 @@ void setFuturNum(int16_t new);
 int16_t getFuturNum();
 void addonDt();
 void wakeLcd();
+void setAlarm(uint32_t time);
+void processAlarm();
 
 #endif

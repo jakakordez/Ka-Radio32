@@ -75,6 +75,24 @@ static int16_t currentValue = 0;
 static bool dvolume = true; // display volume screen
  
 void Screen(typeScreen st); 
+
+static uint32_t alarmTime;
+
+void setAlarm(uint32_t time){
+	alarmTime = time;
+}
+
+void processAlarm(){
+	dt=localtime(&timestamp);
+	kprintf("processAlarm\n");
+	uint32_t currentTime = (dt->tm_hour*60)+dt->tm_min;
+	if(currentTime == alarmTime){
+		kprintf("Alarm start\n");
+		alarmTime--;
+		setCurrentStation(0);
+		playStationInt(0);
+	}
+}
  
  
 // Compatibility B/W Color-------------------- 
@@ -193,6 +211,8 @@ IRAM_ATTR void ServiceAddon(void)
          else */
 		timein++;
 		if ((timestamp % (10*DTIDLE))==0){ itAskTime=true;} // synchronise with ntp every x*DTIDLE
+
+		processAlarm();
 		 
 		if (((timein % DTIDLE)==0)&&(!state)  ) {           
 			{itAskStime=true;timein = 0;} // start the time display
@@ -738,6 +758,7 @@ void task_addon(void *pvParams)
 			//drawScreen();
 			itAskStime = false;
 		}
+		
 
 		if (itLcdOut) // switch off the lcd
 		{
@@ -768,6 +789,7 @@ void task_addon(void *pvParams)
 					playStationInt(futurNum);
 				}				
 			}
+			//processAlarm();
 		}
 //		vTaskDelay(1);
 		if ( timerScroll >= 300) //
