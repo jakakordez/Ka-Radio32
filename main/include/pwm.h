@@ -6,6 +6,5 @@
 
 void pwm_init();
 void pwm_set(float dutyCycle);
-void pwm_process();
 
 #endif

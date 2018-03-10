@@ -21,6 +21,7 @@
 #include "eeprom.h"
 #include "interface.h"
 #include "addon.h"
+#include "alarm.h"
 
 #include "lwip/opt.h"
 #include "lwip/arch.h"

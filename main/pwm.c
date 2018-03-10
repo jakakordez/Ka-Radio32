@@ -9,7 +9,6 @@
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 static float _dutyCycle;
-static float _targetDutyCycle;
 
 void mcpwm_gpio_initialize()
 {
@@ -19,7 +18,6 @@ void mcpwm_gpio_initialize()
 
 void pwm_init(){
     _dutyCycle = 0;
-    _targetDutyCycle = 0;
     mcpwm_gpio_initialize();
 
     //2. initial mcpwm configuration
@@ -34,18 +32,7 @@ void pwm_init(){
 }
 
 void pwm_set(float dutyCycle){
-    _targetDutyCycle = MIN(MAX(dutyCycle, 0.0), 100.0);
-    printf("PWM set target to %f\n", _targetDutyCycle);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, _targetDutyCycle);
-}
-
-void pwm_process(){
-    /*printf("PWM Process\n");
-    if(_targetDutyCycle != _dutyCycle){
-        if(_targetDutyCycle < _dutyCycle) _dutyCycle += 1.0f;
-        else _dutyCycle -= 1.0f;
-        _dutyCycle = MIN(MAX(_dutyCycle, 0.0), 100.0);
-        printf("PWM dc: %f\n", _dutyCycle);
-        mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, _dutyCycle);
-    }*/
+    _dutyCycle = MIN(MAX(dutyCycle, 0.0), 100.0);
+    printf("PWM set target to %f\n", _dutyCycle);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, _dutyCycle);
 }

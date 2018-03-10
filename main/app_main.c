@@ -60,6 +60,7 @@ Copyright (C) 2017  KaraWin
 #include "addon.h"
 #include "pwm.h"
 #include "eeprom.h"
+#include "alarm.h"
 
 /////////////////////////////////////////////////////
 ///////////////////////////

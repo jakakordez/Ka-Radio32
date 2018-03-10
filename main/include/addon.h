@@ -82,10 +82,6 @@ void setFuturNum(int16_t new);
 int16_t getFuturNum();
 void addonDt();
 void wakeLcd();
-void startAlarm(struct device_settings *device);
-void setAlarm(uint32_t time);
-uint32_t getAlarm();
-void processAlarm();
-void disableAlarm();
+
 
 #endif

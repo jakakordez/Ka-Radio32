@@ -18,8 +18,9 @@
 #include "esp_log.h"
 #include "logo.h"
 #include "interface.h"
-#define TAG  "addonucg"
+#include "alarm.h"
 
+#define TAG  "addonucg"
 
 #define ucg_SetColori(a,b,c,d) ucg_SetColor(a,0,b,c,d)
 
