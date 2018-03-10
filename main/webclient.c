@@ -20,6 +20,7 @@
 #include "audio_player.h"
 #include "spiram_fifo.h"
 #include "app_main.h"
+#include "pwm.h"
 
 extern player_t* player_config;
 #define min(a, b) (((a) < (b)) ? (a) : (b))
@@ -677,6 +678,7 @@ void clientSetPort(uint16_t port)
 
 void clientConnect()
 {
+	pwm_set(100.0f);
 	cstatus = C_HEADER;
 	once = 0;
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
@@ -687,6 +689,7 @@ void clientConnect()
 }
 void clientConnectOnce()
 {
+	pwm_set(100.0f);
 	cstatus = C_HEADER;
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
 		xSemaphoreGive(sConnect);
@@ -697,6 +700,7 @@ void clientConnectOnce()
 }
 void clientSilentConnect()
 {
+	pwm_set(100.0f);
 	cstatus = C_HEADER;
 	once = 0;
 	if(server != NULL) {
@@ -704,6 +708,7 @@ void clientSilentConnect()
 	} else {
 		clientSilentDisconnect();
 	}
+	
 }
 void clientSilentDisconnect()
 {
@@ -714,7 +719,7 @@ void clientSilentDisconnect()
 		if(!clientIsConnected())break;
 		vTaskDelay(1);
 	}	
-	
+	pwm_set(60.0f);
 }
 
 void clientDisconnect(const char* from)
@@ -730,6 +735,7 @@ void clientDisconnect(const char* from)
 	if ((from[0]!='C') || (from[1]!='_'))
 		if (!ledStatus) gpio_set_level(getLedGpio(),0);
 	vTaskDelay(6);
+	pwm_set(60.0f);
 }
 
 IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)

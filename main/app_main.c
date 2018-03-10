@@ -58,10 +58,7 @@ Copyright (C) 2017  KaraWin
 #include <u8g2.h>
 #include "u8g2_esp32_hal.h"
 #include "addon.h"
-
-
-
-
+#include "pwm.h"
 #include "eeprom.h"
 
 /////////////////////////////////////////////////////
@@ -787,6 +784,8 @@ void app_main()
 		saveDeviceSettings(device);
 	}
 	
+	pwm_init();
+	pwm_set(60.0f);
 
 	ESP_LOGI(TAG, "audio_output_mode %d\nOne of I2S=0, I2S_MERUS, DAC_BUILT_IN, PDM, VS1053",audio_output_mode);
 
@@ -899,5 +898,7 @@ void app_main()
 	
 //
 	free(device);
+
+	
 //	vTaskDelete( NULL ); 
 }

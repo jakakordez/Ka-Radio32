@@ -25,7 +25,7 @@
 #include "eeprom.h"
 #include "addonu8g2.h"
 #include "addonucg.h"
-
+#include "pwm.h"
 
 #define TAG  "addon"
 
@@ -257,6 +257,7 @@ IRAM_ATTR void ServiceAddon(void)
 		if ((timestamp % (10*DTIDLE))==0){ itAskTime=true;} // synchronise with ntp every x*DTIDLE
 
 		processAlarm();
+		pwm_process();
 		 
 		if (((timein % DTIDLE)==0)&&(!state)  ) {           
 			{itAskStime=true;timein = 0;} // start the time display
