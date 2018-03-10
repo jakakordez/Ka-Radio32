@@ -311,6 +311,11 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 		setAlarm(t);
 	}
 	else if (strstr((char*)payload,"disableAlarm")!= NULL){disableAlarm();}
+	else if (strstr((char*)payload,"getAlarm")!= NULL){
+		char answer[17];
+		sprintf(answer,"{\"alarm\":\"%d\"}", getAlarm());
+		websocketbroadcast(answer, strlen(answer));
+	}
 	//monitor
 	else if (strstr((char*)payload,"monitor")!= NULL){wsMonitor();}
 	else if (strstr((char*)payload,"upgrade")!= NULL){update_firmware("KaRadio32");	}

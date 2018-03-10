@@ -58,7 +58,8 @@ struct device_settings {
 	uint32_t lcd_out;	// timeout in seconds to switch off the lcd. 0 = no timeout
 	uint8_t ddmm;		// 0 = MMDD, 1 = DDMM  in the time display
 	char filler[32]; 
-
+	uint32_t alarmTime;
+	uint8_t alarmState;
 };
 
 struct shoutcast_info {

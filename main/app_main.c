@@ -733,6 +733,8 @@ void app_main()
 		} else
 			ESP_LOGE(TAG,"Device config restored");
 	}	
+
+	startAlarm(device);
 	
 	copyDeviceSettings(); // copy in the safe partion
 

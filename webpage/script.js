@@ -26,6 +26,14 @@ function openwebsocket(){
 		if (arr["monitor"]) playMonitor(arr["monitor"]); 
 		if (arr["wsstation"]) wsplayStation(arr["wsstation"]); 
 		if (arr["wsrssi"]) {document.getElementById('rssi').innerHTML = arr["wsrssi"]+' dBm';recrssi = 0};
+		if (arr["alarm"]) {
+			var value = arr["alarm"];
+			var label = document.getElementById('alarmtime');
+			if(value == 24*60) label.value = "";
+			else{
+				label.value = Math.floor(value/60)+":"+Math.floor(value%60);
+			}
+		}
 	} catch(e){ console.log("error"+e);}
 }
 
@@ -220,6 +228,10 @@ function setAlarm(){
 	{
 		labelAlarm("Error, try again");
 	}	
+}
+
+function getAlarm(){
+	websocket.send("getAlarm");
 }
 
 function promptworking(label) {
@@ -1214,6 +1226,8 @@ document.addEventListener("DOMContentLoaded", function() {
 	checkversion();
 	setMainHeight(curtab);
 	promptworking("");
+	getAlarm();
    	if (intervalrssi != 0)  window.clearTimeout(intervalrssi);
 	intervalrssi = 0;
-	intervalrssi = window.setInterval(wsaskrssi,5000 );});
+	intervalrssi = window.setInterval(wsaskrssi,5000 );
+});

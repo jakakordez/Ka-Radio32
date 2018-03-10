@@ -33,7 +33,7 @@
 // second before time display in stop state
 #define DTIDLE  60
 
-
+void drawScreen();
 
 #define isColor (lcd_type&LCD_COLOR)
 
@@ -43,6 +43,8 @@ xQueueHandle event_lcd;
 u8g2_t u8g2; // a structure which will contain all the data for one display
 ucg_t  ucg;
 static uint8_t lcd_type;
+
+
 
 // list of screen
 typedef  enum typeScreen {smain,svolume,sstation,snumber,stime,snull} typeScreen ;
@@ -85,13 +87,37 @@ enum ALARM_STATE{
 static uint32_t alarmTime;
 static enum ALARM_STATE currentState;
 
+void saveAlarmSettings(){
+	struct device_settings *device;
+	device = getDeviceSettings();
+	if (device != NULL)	 {
+		device->alarmTime = alarmTime;
+		device->alarmState = currentState;
+		saveDeviceSettings(device);
+		ESP_LOGV(TAG,"Alarm saved");
+		free(device);
+	}
+}
+
+void startAlarm(struct device_settings *device){
+	alarmTime = device->alarmTime;
+	currentState = device->alarmState;
+}
+
 void setAlarm(uint32_t time){
 	alarmTime = time;
 	currentState = ALARM_SET;
+	saveAlarmSettings();
 }
 
 void disableAlarm(){
 	currentState = ALARM_DISABLED;
+	saveAlarmSettings();
+}
+
+uint32_t getAlarm(){
+	if(currentState == ALARM_DISABLED) return 24*60;
+	else return alarmTime;
 }
 
 void processAlarm(){
@@ -101,12 +127,14 @@ void processAlarm(){
 		if(currentState == ALARM_SET){
 			kprintf("Alarm triggered\n");
 			currentState = ALARM_TRIGGERED;
+			saveAlarmSettings();
 			setCurrentStation(0);
 			playStationInt(0);
 		}
 	}
 	else if(currentState == ALARM_TRIGGERED){
 		currentState = ALARM_SET;
+		saveAlarmSettings();
 	}
 }
  

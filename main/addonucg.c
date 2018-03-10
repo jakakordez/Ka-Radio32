@@ -24,14 +24,14 @@
 #define ucg_SetColori(a,b,c,d) ucg_SetColor(a,0,b,c,d)
 
 // TOP Background & str  COLOR
-#define CTBACK 50,50,120
-#define CTTFONT 250,250,0
+#define CTBACK 27,27,70//50,50,120
+#define CTTFONT 100,100,0//250,250,0
 // Body font color
-#define CBODY 110,255,110
+#define CBODY 50,130,50//110,255,110
 
 #define CBLACK 0,0,0
 #define CWHITE 255,255,255
-#define CRED 255,10,10
+#define CRED 150,10,10//255,10,10
  
 
 // nams <--> num of line
@@ -523,7 +523,9 @@ void drawTimeUcg(uint8_t mTscreen,struct tm *dt,unsigned timein)
     switch (mTscreen){
       case 1:
 		setfont(text);
-		sprintf(strdate,"IP: %s", getIp());
+		uint32_t alarmTime = getAlarm();
+		if(alarmTime == 24*60) sprintf(strdate,"IP: %s", getIp());
+		else sprintf(strdate,"Alarm %d:%d", alarmTime/60, alarmTime%60);
 		ucg_ClearScreen(&ucg);
         ucg_SetColor(&ucg,0,CRED);  
 		TTitleStr[0] = 0;
