@@ -17,7 +17,6 @@
 #define TAG  "alarm"
 
 static struct tm *dt;
-static time_t timestamp = 0;
 
 enum ALARM_STATE{
 	ALARM_DISABLED,
@@ -61,7 +60,7 @@ uint32_t getAlarm(){
 	else return alarmTime;
 }
 
-void processAlarm(){
+void processAlarm(time_t timestamp){
 	dt=localtime(&timestamp);
 	uint32_t currentTime = (dt->tm_hour*60)+dt->tm_min;
 	if(currentTime == alarmTime){
@@ -69,8 +68,8 @@ void processAlarm(){
 			kprintf("Alarm triggered\n");
 			currentState = ALARM_TRIGGERED;
 			saveAlarmSettings();
-			setCurrentStation(0);
-			playStationInt(0);
+			playStationInt(getCurrentStation());
+			kprintf("Radio playing\n");
 		}
 	}
 	else if(currentState == ALARM_TRIGGERED){

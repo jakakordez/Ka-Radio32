@@ -194,7 +194,7 @@ IRAM_ATTR void ServiceAddon(void)
 		timein++;
 		if ((timestamp % (10*DTIDLE))==0){ itAskTime=true;} // synchronise with ntp every x*DTIDLE
 
-		processAlarm();
+		
 		 
 		if (((timein % DTIDLE)==0)&&(!state)  ) {           
 			{itAskStime=true;timein = 0;} // start the time display
@@ -659,7 +659,7 @@ void task_addon(void *pvParams)
 
 	while (1)
 	{
-
+		processAlarm(timestamp);
 		encoderLoop(); // compute the encoder
 		
 		irLoop();

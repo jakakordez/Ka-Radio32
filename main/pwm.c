@@ -10,18 +10,11 @@
 
 static float _dutyCycle;
 
-void mcpwm_gpio_initialize()
-{
-    printf("initializing mcpwm gpio...\n");
-    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, PWM_PIN);
-}
-
 void pwm_init(){
     _dutyCycle = 0;
-    mcpwm_gpio_initialize();
 
-    //2. initial mcpwm configuration
     printf("Configuring Initial Parameters of mcpwm...\n");
+    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, PWM_PIN);
     mcpwm_config_t pwm_config;
     pwm_config.frequency = 1000;    //frequency = 500Hz,
     pwm_config.cmpr_a = 0;    //duty cycle of PWMxA = 0

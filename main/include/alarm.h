@@ -7,7 +7,7 @@
 void startAlarm(struct device_settings *device);
 void setAlarm(uint32_t time);
 uint32_t getAlarm();
-void processAlarm();
+void processAlarm(time_t timestamp);
 void disableAlarm();
 
 #endif
