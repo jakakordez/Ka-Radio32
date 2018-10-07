@@ -10,7 +10,7 @@
 
 // HSPI pins
 //-----------
-#define PIN_NUM_MISO GPIO_NUM_19 	// Master Input, Slave Output
+#define PIN_NUM_MISO GPIO_NUM_32//19 	// Master Input, Slave Output
 #define PIN_NUM_MOSI GPIO_NUM_23	// Master Output, Slave Input   Named Data or SDA or D1 for oled
 #define PIN_NUM_CLK  GPIO_NUM_18 	// Master clock  Named SCL or SCK or D0 for oled
 
@@ -32,7 +32,7 @@
 //-------------
 #define PIN_ENC_A   GPIO_NUM_16		// CLK
 #define PIN_ENC_B   GPIO_NUM_17		// DT
-#define PIN_ENC_BTN GPIO_NUM_5		// SW
+#define PIN_ENC_BTN GPIO_NUM_15		// SW
 
 // I2C lcd (and rda5807 if lcd is i2c or LCD_NONE)
 //------------------------------------------------
@@ -42,8 +42,8 @@
 
 // I2C rda5807 (if lcd is spi)
 //----------------------------
-#define PIN_SI2C_SCL GPIO_NUM_15
-#define PIN_SI2C_SDA GPIO_NUM_27
+#define PIN_SI2C_SCL GPIO_NUM_32
+#define PIN_SI2C_SDA GPIO_NUM_33
 
 // SPI lcd
 //---------

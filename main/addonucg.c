@@ -19,6 +19,7 @@
 #include "logo.h"
 #include "interface.h"
 #include "alarm.h"
+#include "sht21.h"
 
 #define TAG  "addonucg"
 
@@ -26,13 +27,13 @@
 
 // TOP Background & str  COLOR
 #define CTBACK 27,27,70//50,50,120
-#define CTTFONT 100,100,0//250,250,0
+#define CTTFONT 250,250,0//100,100,0
 // Body font color
-#define CBODY 50,130,50//110,255,110
+#define CBODY 110,255,110//50,130,50
 
 #define CBLACK 0,0,0
 #define CWHITE 255,255,255
-#define CRED 150,10,10//255,10,10
+#define CRED 255,10,10//150,10,10
  
 
 // nams <--> num of line
@@ -525,7 +526,10 @@ void drawTimeUcg(uint8_t mTscreen,struct tm *dt,unsigned timein)
       case 1:
 		setfont(text);
 		uint32_t alarmTime = getAlarm();
-		if(alarmTime == 24*60) sprintf(strdate,"IP: %s", getIp());
+		if(alarmTime == 24*60) {
+			sprintf(strdate, "T: %.1fC H: %d%%", sht21_getTemperature(), (int)sht21_getHumidity());
+			//sprintf(strdate,"IP: %s", getIp());
+		}
 		else sprintf(strdate,"Alarm %d:%d", alarmTime/60, alarmTime%60);
 		ucg_ClearScreen(&ucg);
         ucg_SetColor(&ucg,0,CRED);  
@@ -735,13 +739,13 @@ void lcd_initUcg(uint8_t *lcd_type)
 		
 		switch (*lcd_type)
 		{
-			case LCD_SPI_ILI9341:
+			/*case LCD_SPI_ILI9341:
 				ucg_SetRotate270(&ucg);
-				break;
+				break;*/
 			case LCD_SPI_SSD1331:
 				break;
 			default:
-			ucg_SetRotate90(&ucg);
+				ucg_SetRotate90(&ucg);
 			
 		}
 		

@@ -678,7 +678,7 @@ void clientSetPort(uint16_t port)
 
 void clientConnect()
 {
-	pwm_set(100.0f);
+	pwm_set(PWM_FULL);
 	cstatus = C_HEADER;
 	once = 0;
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
@@ -689,7 +689,7 @@ void clientConnect()
 }
 void clientConnectOnce()
 {
-	pwm_set(100.0f);
+	pwm_set(PWM_FULL);
 	cstatus = C_HEADER;
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
 		xSemaphoreGive(sConnect);
@@ -700,7 +700,7 @@ void clientConnectOnce()
 }
 void clientSilentConnect()
 {
-	pwm_set(100.0f);
+	pwm_set(PWM_FULL);
 	cstatus = C_HEADER;
 	once = 0;
 	if(server != NULL) {
@@ -719,7 +719,7 @@ void clientSilentDisconnect()
 		if(!clientIsConnected())break;
 		vTaskDelay(1);
 	}	
-	pwm_set(60.0f);
+	pwm_set(PWM_DIMM);
 }
 
 void clientDisconnect(const char* from)
@@ -735,7 +735,7 @@ void clientDisconnect(const char* from)
 	if ((from[0]!='C') || (from[1]!='_'))
 		if (!ledStatus) gpio_set_level(getLedGpio(),0);
 	vTaskDelay(6);
-	pwm_set(60.0f);
+	pwm_set(PWM_DIMM);
 }
 
 IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)

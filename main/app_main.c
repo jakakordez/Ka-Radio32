@@ -61,6 +61,7 @@ Copyright (C) 2017  KaraWin
 #include "pwm.h"
 #include "eeprom.h"
 #include "alarm.h"
+#include "sht21.h"
 
 /////////////////////////////////////////////////////
 ///////////////////////////
@@ -118,7 +119,6 @@ static output_mode_t audio_output_mode;
 static uint8_t clientIvol = 0;
 //ip
 static char localIp[20];
-
 
 // disable 1MS timer interrupt
 void noInterrupt1Ms()
@@ -259,8 +259,8 @@ uint32_t checkUart(uint32_t speed)
 *******************************************************************************/
 static void init_hardware()
 {
-	VS1053_HW_init(); // init spi
-	VS1053_Start();
+	//VS1053_HW_init(); // init spi
+	//VS1053_Start();
 	
     //Initialize the SPI RAM chip communications and see if it actually retains some bytes. If it
     //doesn't, warn user.
@@ -268,6 +268,8 @@ static void init_hardware()
         ESP_LOGE(TAG, "\nSPI RAM chip fail!");
         esp_restart();
     }
+
+	sht21_init();
 
     ESP_LOGI(TAG, "hardware initialized");
 }
@@ -766,6 +768,7 @@ void app_main()
 	    conf.scl_io_num = (device->lcd_type == LCD_NONE)?PIN_I2C_SCL:PIN_SI2C_SCL;
 	    conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
 	    conf.master.clk_speed = I2C_MASTER_RFREQ_HZ;
+		printf("I2C pins SDA: %d, SCL: %d\n", conf.sda_io_num, conf.scl_io_num);
 		//ESP_ERROR_CHECK
 		(i2c_param_config(I2C_MASTER_NUM, &conf));
 		ESP_LOGD(TAG, "i2c_driver_install %d", I2C_MASTER_NUM);
@@ -786,7 +789,7 @@ void app_main()
 	}
 	
 	pwm_init();
-	pwm_set(60.0f);
+	pwm_set(PWM_DIMM);
 
 	ESP_LOGI(TAG, "audio_output_mode %d\nOne of I2S=0, I2S_MERUS, DAC_BUILT_IN, PDM, VS1053",audio_output_mode);
 
@@ -802,6 +805,9 @@ void app_main()
 		device->uartspeed = uspeed;
 		saveDeviceSettings(device);
 	}	
+
+	printf("SHT21 temperature: %f\n", sht21_getTemperature());
+	printf("SHT21 humidity: %f\n", sht21_getHumidity());
 	
 	// volume
 	setIvol( device->vol);
