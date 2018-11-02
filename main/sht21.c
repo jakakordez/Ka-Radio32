@@ -241,14 +241,14 @@ float sht21_CalcRH(uint16_t rh) {
 
 	rh &= ~0x0003;	// clean last two bits
 
-  	return (-6.0 + 125.0/65536 * (float)rh); // return relative humidity
+  	return (-6.0 + 125.0/65536.0 * (float)rh); // return relative humidity
 }
 
 float sht21_CalcT(uint16_t t) {
 
 	t &= ~0x0003;	// clean last two bits
  	
-	return (-46.85 + 175.72/65536 * (float)t);
+	return (-46.85 + 175.72/65536.0 * (float)t);
 }
 
 uint8_t sht21_CRC_Checksum(uint8_t data[], uint8_t no_of_bytes, uint8_t checksum) {

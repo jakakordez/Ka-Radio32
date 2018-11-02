@@ -343,7 +343,8 @@ void drawScreen()
   switch (stateScreen)
   {
     case smain:  // 
-      drawFrame();
+	  drawTime();
+      //drawFrame();
       break;
     case svolume:
       drawVolume();
@@ -359,7 +360,7 @@ void drawScreen()
       break;
     default: 
 	  Screen(smain); 
-	  drawFrame();	  
+	  drawTime();//drawFrame();	  
   }
   if (!(isColor)) u8g2_SendBuffer(&u8g2); 
   mTscreen = MTNODISPLAY;

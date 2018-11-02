@@ -31,6 +31,10 @@
 // Body font color
 #define CBODY 110,255,110//50,130,50
 
+#define BCGCOLOR 37, 40, 57
+#define FRGCOLOR 239, 180, 50
+#define SFRGCOLOR 158, 86, 255
+
 #define CBLACK 0,0,0
 #define CWHITE 255,255,255
 #define CRED 255,10,10//150,10,10
@@ -341,10 +345,16 @@ void draw(int i)
 		}
         break;
         default:
-          ucg_SetColori(&ucg,0,0,0); 
-          ucg_DrawBox(&ucg,0,y*i+z,x,y/*-ucg_GetFontDescent(&ucg)*/); 
-          setColor(i);
-          if (lline[i] != NULL) ucg_DrawString(&ucg,0,y*i+z+1,0,lline[i]+iline[i]);                
+		  yyy = 20*i+45;
+		  if(i == STATION1) yyy += 15;
+		  ucg_SetColor(&ucg,0,BCGCOLOR); 
+          ucg_DrawBox(&ucg,0,yyy,x,25/*-ucg_GetFontDescent(&ucg)*/); 
+		  //ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
+		  ucg_SetColor(&ucg,0,SFRGCOLOR); 
+		  ucg_SetColor(&ucg,1,BCGCOLOR); 
+          //ucg_SetColori(&ucg,0,0,0); 
+          //setColor(i);
+          if (lline[i] != NULL) ucg_DrawString(&ucg,4,yyy,0,lline[i]+iline[i]);                
    }      
 }
 
@@ -376,7 +386,7 @@ int i;
 		ucg_SetColor(&ucg,0,255,255,0);  
 		ucg_SetColor(&ucg,1,0,255,255);  
 		ucg_DrawGradientLine(&ucg,0,(4*y) - (y/2)-5,x,0);
-		ucg_SetColor(&ucg,0,CBLACK);  
+		ucg_SetColor(&ucg,0,CBLACK);
 		ucg_DrawBox(&ucg,0,0,x-1,15);  
 		for (i=0;i<LINES;i++) draw(i);
 		// no break
@@ -504,13 +514,13 @@ static void drawSecond(struct tm *dt,unsigned timein)
   {
   char strseco[3]; 
   uint16_t len;
-  sprintf(strseco,":%02d",dt->tm_sec);
+  sprintf(strseco,"%02d",dt->tm_sec);
   setfont(text);
-  len = ucg_GetStrWidth(&ucg,"xxx");
+  len = ucg_GetStrWidth(&ucg,"xx");
 
-  ucg_SetColor(&ucg,1,CBLACK); 
+  ucg_SetColor(&ucg,1,BCGCOLOR); 
   ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
-  ucg_SetColor(&ucg,0,CBODY);
+  ucg_SetColor(&ucg,0,CWHITE);
   ucg_DrawString(&ucg,x-len-8,yy-18,0,strseco); 
   ucg_SetFontMode(&ucg,UCG_FONT_MODE_TRANSPARENT);
   insec = timein; //to avoid redisplay
@@ -519,40 +529,67 @@ static void drawSecond(struct tm *dt,unsigned timein)
 
 void drawTimeUcg(uint8_t mTscreen,struct tm *dt,unsigned timein)
 {
-  char strdate[23];
-  char strtime[20];
+    char strdate[23];
+    char strtime[20];
+	uint16_t len;
     sprintf(strtime,"%02d:%02d", dt->tm_hour, dt->tm_min);
     switch (mTscreen){
       case 1:
 		setfont(text);
-		uint32_t alarmTime = getAlarm();
-		if(alarmTime == 24*60) {
-			sprintf(strdate, "T: %.1fC H: %d%%", sht21_getTemperature(), (int)sht21_getHumidity());
-			//sprintf(strdate,"IP: %s", getIp());
-		}
-		else sprintf(strdate,"Alarm %d:%d", alarmTime/60, alarmTime%60);
-		ucg_ClearScreen(&ucg);
-        ucg_SetColor(&ucg,0,CRED);  
+		ucg_SetColor(&ucg,0,BCGCOLOR);  
+		ucg_DrawBox(&ucg,0,0,x,yy); 
+		ucg_SetColor(&ucg,0,FRGCOLOR); 
+		ucg_DrawBox(&ucg, x - 75, 9, 60, 60);
+		//ucg_ClearScreen(&ucg);
+        //ucg_SetColor(&ucg,0,CRED);  
 		TTitleStr[0] = 0;
 		TTimeStr[0] = 0;
 //        ucg_SetColor(&ucg,0,CBLACK);  
 //        ucg_DrawBox(&ucg,0,HHeader,x,yy);     		
         // draw ip
         //ucg_SetFont(&ucg,ucg_font_6x13_tf);
-        ucg_DrawString(&ucg,4,yy-18,0,strdate);		
       case 2:
-	    if (getDdmm())
-			sprintf(strdate,"%02d-%02d-%04d", dt->tm_mday, dt->tm_mon+1,  dt->tm_year+1900);
-	    else
-			sprintf(strdate,"%02d-%02d-%04d", dt->tm_mon+1, dt->tm_mday, dt->tm_year+1900);
-		drawTTitleUcg(strdate);
+
+		setfont(text);
+		if(mline[STATION1]) draw(STATION1);
+		if(mline[TITLE1]) draw(TITLE1);
+		if(mline[TITLE11]) draw(TITLE11);
+		if(mline[TITLE2]) draw(TITLE2);
+		if(mline[TITLE21]) draw(TITLE21);
 		if (strcmp(TTimeStr,strtime)!= 0)
 		{	
+			ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
+			ucg_SetColor(&ucg,0,CWHITE); 
+			ucg_SetColor(&ucg,1,BCGCOLOR); 
+			uint32_t alarmTime = getAlarm();
+			float temp = sht21_getTemperature();
+			int hum = (int)sht21_getHumidity();
+			printf("A: %d:%02d T: %.1fC H: %d%%\n", alarmTime/60, alarmTime%60, temp, hum);
+			if(alarmTime == 24*60) {
+				sprintf(strdate, "T: %.1fC H: %d%%", temp, hum);
+				//sprintf(strdate,"IP: %s", getIp());
+			}
+			else sprintf(strdate,"A:%d:%02d T:%.1fC H:%d%%", alarmTime/60, alarmTime%60, temp, hum);
+        	ucg_DrawString(&ucg,4,yy-18,0,strdate);	
+			
+			ucg_SetColor(&ucg,1,FRGCOLOR);		
+			ucg_SetColor(&ucg,0,BCGCOLOR);  
+			// Print date
+			sprintf(strdate,"%d", dt->tm_mday);
+			len = ucg_GetStrWidth(&ucg,strdate);
+			ucg_DrawString(&ucg,(x-45)-(len/2),19,0,strdate);	
+			// Print month
+			char *months[] = {"Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Avg", "Sep", "Okt", "Nov", "Dec"};
+			sprintf(strdate, "%s", months[dt->tm_mon]);
+			len = ucg_GetStrWidth(&ucg,strdate);
+			ucg_DrawString(&ucg,(x-45)-(len/2),41,0,strdate);	
+
 			//ucg_SetFont(&ucg,ucg_font_inr38_mf); 
 			setfont(large);
-			ucg_SetColor(&ucg,0,CBODY);		
-			ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
-			ucg_DrawString(&ucg,(x/2)-(ucg_GetStrWidth(&ucg,strtime)/2),yy/3,0,strtime); 
+			ucg_SetColor(&ucg,0,FRGCOLOR);		
+			ucg_SetColor(&ucg,1,BCGCOLOR);  
+			
+			ucg_DrawString(&ucg,10,10,0,strtime); 
 			strcpy(TTimeStr,strtime);
 			ucg_SetFontMode(&ucg,UCG_FONT_MODE_TRANSPARENT);
 		}
@@ -560,7 +597,7 @@ void drawTimeUcg(uint8_t mTscreen,struct tm *dt,unsigned timein)
 		break;
       default:;
     }
-	drawSecond(dt,timein);;     	
+	drawSecond(dt,timein);
 }
 
 
@@ -623,6 +660,7 @@ void separatorUcg(char* from)
 //cli.meta
 void metaUcg(char* ici)
 {
+	printf("metaUcg(%s)\n", ici);
      cleartitleUcg(3); 
      strcpy(title,ici+7);    
 	 removeUtf8(title);
@@ -632,6 +670,7 @@ void metaUcg(char* ici)
 //cli.icy4
 void icy4Ucg(char* ici)
 {
+	printf("icy4Ucg(%s)\n", ici);
 	 strcpy(genre,ici+7);
      removeUtf8(genre); 
      lline[2] = genre;
@@ -639,6 +678,7 @@ void icy4Ucg(char* ici)
 //cli.icy0
 void icy0Ucg(char* ici)
 {
+	printf("icy0Ucg(%s)\n", ici);
       clearAllUcg();
       if (strlen(ici+7) == 0) strcpy (station,nameset);
       else strcpy(station,ici+7);
@@ -649,6 +689,7 @@ void icy0Ucg(char* ici)
 //cli.stopped or label
 void statusUcg(char* label)
 {
+	printf("statucUcg(%s)\n", label);
      cleartitleUcg(3);
      strcpy(title,label);
      lline[TITLE1] = title;	
@@ -656,6 +697,7 @@ void statusUcg(char* label)
 //cli.nameset
 void namesetUcg(char* ici)
 {
+	printf("namesetUcg(%s)\n", ici);
 	strcpy(nameset,ici+8);
     ici = strstr(nameset," ");
     if (ici != NULL)

@@ -57,7 +57,11 @@ void disableAlarm(){
 
 uint32_t getAlarm(){
 	if(currentState == ALARM_DISABLED) return 24*60;
-	else return alarmTime;
+	if(alarmTime >= 24*60){
+		alarmTime = 24*60;
+		currentState = ALARM_DISABLED;
+	}
+	return alarmTime;
 }
 
 void processAlarm(time_t timestamp){
