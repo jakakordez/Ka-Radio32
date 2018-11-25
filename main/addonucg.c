@@ -521,7 +521,7 @@ static void drawSecond(struct tm *dt,unsigned timein)
   ucg_SetColor(&ucg,1,BCGCOLOR); 
   ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
   ucg_SetColor(&ucg,0,CWHITE);
-  ucg_DrawString(&ucg,x-len-8,yy-18,0,strseco); 
+  ucg_DrawString(&ucg,x-len-6,yy-18,0,strseco); 
   ucg_SetFontMode(&ucg,UCG_FONT_MODE_TRANSPARENT);
   insec = timein; //to avoid redisplay
   }    
@@ -566,12 +566,23 @@ void drawTimeUcg(uint8_t mTscreen,struct tm *dt,unsigned timein)
 			int hum = (int)sht21_getHumidity();
 			printf("A: %d:%02d T: %.1fC H: %d%%\n", alarmTime/60, alarmTime%60, temp, hum);
 			if(alarmTime == 24*60) {
-				sprintf(strdate, "T: %.1fC H: %d%%", temp, hum);
+				sprintf(strdate, " T: %.1fC H: %d%%", temp, hum);
 				//sprintf(strdate,"IP: %s", getIp());
 			}
-			else sprintf(strdate,"A:%d:%02d T:%.1fC H:%d%%", alarmTime/60, alarmTime%60, temp, hum);
-        	ucg_DrawString(&ucg,4,yy-18,0,strdate);	
-			
+			else sprintf(strdate,"%d:%02d  T:%.1fC H:%d%%", alarmTime/60, alarmTime%60, temp, hum);
+        	ucg_DrawString(&ucg,17,yy-18,0,strdate);	
+			if(alarmTime != 24*60){
+				ucg_DrawCircle(&ucg, 8, yy-9, 7, UCG_DRAW_ALL);
+				ucg_DrawVLine(&ucg, 8, yy-14, 6);
+				ucg_DrawLine(&ucg, 8, yy-9, 10, yy-6);
+
+				ucg_DrawLine(&ucg, 2, yy-1, 4, yy-3);
+				ucg_DrawLine(&ucg, 12, yy-3, 14, yy-1);
+
+				ucg_DrawLine(&ucg, 1, yy-14, 3, yy-16);
+				ucg_DrawLine(&ucg, 13, yy-16, 15, yy-14);
+			}
+
 			ucg_SetColor(&ucg,1,FRGCOLOR);		
 			ucg_SetColor(&ucg,0,BCGCOLOR);  
 			// Print date
