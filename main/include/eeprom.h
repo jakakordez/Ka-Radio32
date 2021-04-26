@@ -89,6 +89,8 @@ struct device_settings {
 	char hostname[HOSTLEN];
 	uint32_t tp_calx;
 	uint32_t tp_caly;
+	uint32_t alarmTime;
+	uint8_t alarmState;
 
 } Device_Settings;
 

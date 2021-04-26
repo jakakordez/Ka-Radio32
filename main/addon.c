@@ -33,6 +33,8 @@
 
 #include "esp_adc_cal.h"
 
+#include "alarm.h"
+
 #define TAG  "addon"
 
 static void evtClearScreen();
@@ -1286,6 +1288,7 @@ void task_addon(void *pvParams)
 	
 	while (1)
 	{
+		processAlarm(timestamp);
 		adcLoop();  // compute the adc keyboard and battery
 		periphLoop(); // compute the encoder the buttons and joysticks
 		irLoop();  // compute the ir		

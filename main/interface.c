@@ -1502,8 +1502,6 @@ void checkCommand(int size, char* s)
 		else if(strcmp(tmp+4, "info") == 0) 	clientInfo();
 		else if(startsWith (  "vol",tmp+4)) 	clientVol(tmp);
 		else if(startsWith (  "edit",tmp+4)) 	clientEdit(tmp);
-		else if(startsWith (  "wake",tmp+4)) 	clientWake(tmp);
-		else if(startsWith (  "sleep",tmp+4)) 	clientSleep(tmp);
 		else printInfo(tmp);
 	} else
 	if(startsWith ("sys.", tmp))

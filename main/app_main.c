@@ -63,6 +63,7 @@ Copyright (C) 2017  KaraWin
 #include "ClickButtons.h"
 
 #include "eeprom.h"
+#include "alarm.h"
 
 /////////////////////////////////////////////////////
 ///////////////////////////
@@ -166,49 +167,6 @@ IRAM_ATTR void   msCallback(void *pArg) {
 	TIMERG1.hw_timer[timer_idx].config.alarm_en = 1;
 }
 
-IRAM_ATTR void   sleepCallback(void *pArg) {
-	int timer_idx = (int) pArg;
-	queue_event_t evt;	
-	TIMERG0.int_clr_timers.t0 = 1; //isr ack
-		evt.type = TIMER_SLEEP;
-        evt.i1 = TIMERGROUP;
-        evt.i2 = timer_idx;
-	xQueueSendFromISR(event_queue, &evt, NULL);	
-	TIMERG0.hw_timer[timer_idx].config.alarm_en = 0;
-}
-IRAM_ATTR void   wakeCallback(void *pArg) {
-
-	int timer_idx = (int) pArg;
-	queue_event_t evt;	
-	TIMERG0.int_clr_timers.t1 = 1;
-        evt.i1 = TIMERGROUP;
-        evt.i2 = timer_idx;
-		evt.type = TIMER_WAKE;
-	xQueueSendFromISR(event_queue, &evt, NULL);
-	TIMERG0.hw_timer[timer_idx].config.alarm_en = 0;
-}
-	
-
-//return the current timer value in sec
-uint64_t getSleep()
-{
-	uint64_t ret=0;
-	uint64_t tot=0;
-	timer_get_alarm_value(TIMERGROUP, sleepTimer,&tot);
-	timer_get_counter_value(TIMERGROUP, sleepTimer,&ret);
-	ESP_LOGD(TAG,"getSleep: ret: %lld, tot: %lld, return %lld",ret,tot,tot-ret);
-	return ((tot)-ret)/5000000;
-}
-uint64_t getWake()
-{
-	uint64_t ret=0;
-	uint64_t tot=0;
-	timer_get_alarm_value(TIMERGROUP, wakeTimer,&tot);
-	timer_get_counter_value(TIMERGROUP, wakeTimer,&ret);
-	ESP_LOGD(TAG,"getWake: ret: %lld, tot: %lld  return %lld",ret,(tot),tot-ret);
-	return ((tot)-ret)/5000000;
-}
-
 void tsocket(const char* lab, uint32_t cnt)
 {
 		char* title = malloc(strlen(lab)+50);
@@ -216,48 +174,6 @@ void tsocket(const char* lab, uint32_t cnt)
 		websocketbroadcast(title, strlen(title));
 		free(title);	
 }
-
-void stopSleep(){
-	ESP_LOGD(TAG,"stopSleep");
-	ESP_ERROR_CHECK(timer_pause(TIMERGROUP, sleepTimer));
-	ESP_ERROR_CHECK(timer_set_alarm_value(TIMERGROUP, sleepTimer, 0x00000000ULL));
-	ESP_ERROR_CHECK(timer_set_counter_value(TIMERGROUP, sleepTimer, 0x00000000ULL));
-
-	tsocket("lsleep",0);
-}
-void startSleep(uint32_t delay)
-{
-	ESP_LOGD(TAG,"startSleep: %d min.",delay );
-	if (delay == 0) return;
-	stopSleep();
-	ESP_ERROR_CHECK(timer_set_counter_value(TIMERGROUP, sleepTimer, 0x00000000ULL));
-	ESP_ERROR_CHECK(timer_set_alarm_value(TIMERGROUP, sleepTimer,TIMERVALUE(delay*60)));
-	ESP_ERROR_CHECK(timer_enable_intr(TIMERGROUP, sleepTimer));
-	ESP_ERROR_CHECK(timer_set_alarm(TIMERGROUP, sleepTimer,TIMER_ALARM_EN));
-	ESP_ERROR_CHECK(timer_start(TIMERGROUP, sleepTimer));
-	tsocket("lsleep",delay);
-}
-
-void stopWake(){
-	ESP_LOGD(TAG,"stopWake");
-	ESP_ERROR_CHECK(timer_pause(TIMERGROUP, wakeTimer));
-	ESP_ERROR_CHECK(timer_set_counter_value(TIMERGROUP, wakeTimer, 0x00000000ULL));
-	ESP_ERROR_CHECK(timer_set_alarm_value(TIMERGROUP, wakeTimer, 0x00000000ULL));
-	tsocket("lwake",0);
-}
-void startWake(uint32_t delay)
-{
-	ESP_LOGD(TAG,"startWake: %d min.",delay);
-	if (delay == 0) return;
-	stopWake();
-	ESP_ERROR_CHECK(timer_set_counter_value(TIMERGROUP, wakeTimer, 0x00000000ULL));
-	ESP_ERROR_CHECK(timer_set_alarm_value(TIMERGROUP, wakeTimer,TIMERVALUE(delay*60)));
-	ESP_ERROR_CHECK(timer_enable_intr(TIMERGROUP, wakeTimer));
-	ESP_ERROR_CHECK(timer_set_alarm(TIMERGROUP, wakeTimer,TIMER_ALARM_EN));
-	ESP_ERROR_CHECK(timer_start(TIMERGROUP, wakeTimer));
-	tsocket("lwake",delay);	
-}
-
 
 void initTimers()
 {
@@ -269,14 +185,6 @@ timer_config_t config;
     config.intr_type = TIMER_INTR_LEVEL;
     config.counter_en = TIMER_PAUSE;
 	
-	/*Configure timer sleep*/
-    ESP_ERROR_CHECK(timer_init(TIMERGROUP, sleepTimer, &config));
-	ESP_ERROR_CHECK(timer_pause(TIMERGROUP, sleepTimer));
-	ESP_ERROR_CHECK(timer_isr_register(TIMERGROUP, sleepTimer, sleepCallback, (void*) sleepTimer, 0, NULL));
-	/*Configure timer wake*/
-    ESP_ERROR_CHECK(timer_init(TIMERGROUP, wakeTimer, &config));
-	ESP_ERROR_CHECK(timer_pause(TIMERGROUP, wakeTimer));
-	ESP_ERROR_CHECK(timer_isr_register(TIMERGROUP, wakeTimer, wakeCallback, (void*) wakeTimer, 0, NULL));	
 	/*Configure timer 1MS*/
 	config.auto_reload = TIMER_AUTORELOAD_EN;
 	config.divider = TIMER_DIVIDER1MS ;  
@@ -730,19 +638,6 @@ void timerTask(void* p) {
 		// read and treat the timer queue events
 //		int nb = uxQueueMessagesWaiting(event_queue);
 //		if (nb >29) printf(" %d\n",nb);
-		while (xQueueReceive(event_queue, &evt, 0))
-		{
-			switch (evt.type){
-					case TIMER_SLEEP:
-						clientDisconnect("Timer"); // stop the player
-					break;
-					case TIMER_WAKE:
-					clientConnect(); // start the player	
-					break;
-					default:
-					break;
-			}
-		}
 		if (ledStatus)
 		{
 			if (ctimeMs >= cCur)
@@ -906,6 +801,8 @@ void app_main()
 		} else
 			ESP_LOGE(TAG,"Device config restored");
 	}	
+
+	startAlarm(g_device);
 	
 	copyDeviceSettings(); // copy in the safe partion
 

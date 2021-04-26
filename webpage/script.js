@@ -34,6 +34,14 @@ function openwebsocket(){
 		if (arr["iurl"]) {document.getElementById('instant_url').value  = arr["iurl"];buildURL();}
 		if (arr["ipath"]) {document.getElementById('instant_path').value = arr["ipath"];buildURL();}
 		if (arr["iport"]) {document.getElementById('instant_port').value = arr["iport"];buildURL();}
+		if (arr["alarm"]) {
+			var value = arr["alarm"];
+			var label = document.getElementById('alarmtime');
+			if(value == 24*60) label.value = "";
+			else{
+				label.value = Math.floor(value/60)+":"+Math.floor(value%60);
+			}
+		}
 	} catch(e){ console.log("error"+e);}
 }
 
@@ -228,88 +236,38 @@ function timezone(offset) {
     return prefix+hours+":"+minutes;	
 }
 
-function labelSleep(label){
-	document.getElementById('sminutes').innerHTML = label;	
+function getAlarm(){
+	websocket.send("getAlarm");
 }
-function sleepup(e)
-{
-	if (e.keyCode == 13) startSleep();
-}
-function startSleep(){
+
+function setAlarm(){
 	var valm,h0,h1;
 	var cur = new Date();
-	var hop = document.getElementById("sleepdelay").value.split(":");
+	var hop = document.getElementById("alarmtime").value.split(":");
 	h0 = parseInt(hop[0],10);
 	h1 = parseInt(hop[1],10);
-	if(!isNaN(h0)){
-		if (!isNaN(h1)) // time mode
-		{
-			fut = new Date(cur.getFullYear(),cur.getMonth(), cur.getDate(),h0,h1,0 );
-			if (fut.getTime() > cur.getTime())
-				valm = Math.round((fut.getTime() - cur.getTime())/60000) ; //seconds
-			else valm = 1440 - Math.round((cur.getTime() - fut.getTime())/60000) ; //seconds
-			if (valm == 0)
-			if (fut.getTime() > cur.getTime() )   valm = 1; // 1 minute mini
-			else valm = 1440;
-		} else valm = h0; // minute mode
-		websocket.send("startSleep=" +valm +"&");
-//		labelSleep("Started, Good night!");
-//		window.setTimeout(labelSleep, 2000 ,(valm*60)-2);	
+	if(!isNaN(h0) && !isNaN(h1)){
+		valm = (h0*60)+h1;
+		websocket.send("setAlarm=" +valm +"&");
+		labelAlarm("Alarm set");
 	} else
 	{
-		labelSleep("Error, try again");
-		window.setTimeout(labelSleep, 2000 ,"0");
+		labelAlarm("Error, try again");
 	}	
 }
 
-function stopSleep(){
-	var a = document.getElementById("sleepdelay").value;
-    websocket.send("stopSleep");
-    labelSleep("0");
-//    window.setTimeout(labelSleep, 2000, a);	
+function disableAlarm(){
+	websocket.send("disableAlarm");
+	labelAlarm("Disabled");
 }
 
-function labelWake(label){
-	document.getElementById('wminutes').innerHTML = label;	
+function labelAlarm(label){
+	document.getElementById('lblAlarm').innerHTML = label;	
 }
-function wakeup(e)
+function alarmup(e)
 {
-	if (e.keyCode == 13) startWake();
+	if (e.keyCode == 13) setAlarm();
 }
-function startWake(){
-	var valm,h0,h1;
-	var cur = new Date();
-	var hop = document.getElementById("wakedelay").value.split(":");
-	h0 = parseInt(hop[0],10);
-	h1 = parseInt(hop[1],10);
-	if(!isNaN(h0)){
-		if (!isNaN(h1)) // time mode
-		{
-			fut = new Date(cur.getFullYear(),cur.getMonth(), cur.getDate(),h0,h1,0 );
-			if (fut.getTime() > cur.getTime())
-				valm = Math.round((fut.getTime() - cur.getTime())/60000) ; //seconds
-			else valm = 1440 - Math.round((cur.getTime() - fut.getTime())/60000) ; //seconds
-			if (valm == 0)
-			if (fut.getTime() > cur.getTime() )   valm = 1; // 1 minute mini
-			else valm = 1440;
-		} else valm = h0; // minute mode
-		websocket.send("startWake=" +valm +"&");
-//		labelWake("Started");
-//		window.setTimeout(labelWake, 2000 ,(valm*60)-2);	
-	} else
-	{
-		labelWake("Error, try again");
-		window.setTimeout(labelWake, 2000 ,"0");
-	}	
-}
-
-function stopWake(){
-	var a = document.getElementById("wakedelay").value;
-    websocket.send("stopWake");
-    labelWake("0");
-}
-
-
 
 function promptworking(label) {
 	document.getElementById('meta').innerHTML = label;
@@ -1514,5 +1472,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	atheme();
 	checkversion(); 
 	setMainHeight(curtab);
+	getAlarm();
 });
 
