@@ -28,6 +28,11 @@
 #include "spiram_fifo.h"
 #include "app_main.h"
 
+#define PWM_FULL 0
+#define PWM_OFF 100.0f
+#define PWM_DIMM 60
+#include "custom.h"
+
 extern player_t* player_config;
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 //2000 1440 1460 1436
@@ -837,6 +842,7 @@ void clientSetPort(uint16_t port)
 
 void clientConnect()
 {
+	backlight_percentage_set(PWM_FULL);
 	cstatus = C_HEADER;
 	once = 0;
 	if((serverInfo = (struct hostent*)gethostbyname(cleanURL()))) {
@@ -851,6 +857,7 @@ void clientConnect()
 }
 void clientConnectOnce()
 {
+	backlight_percentage_set(PWM_FULL);
 	cstatus = C_HEADER;
 	if((serverInfo = (struct hostent*)gethostbyname(cleanURL()))) {
 		xSemaphoreGive(sConnect);
@@ -883,6 +890,7 @@ void clientSilentDisconnect()
 	}
 //	esp_wifi_set_ps(WIFI_PS_MAX_MODEM);
 
+	backlight_percentage_set(PWM_DIMM);
 }
 
 void clientDisconnect(const char* from)
@@ -909,6 +917,7 @@ void clientDisconnect(const char* from)
 		g_device->vol = getIvol();
 		saveDeviceSettingsVolume(g_device);
 	}
+	backlight_percentage_set(PWM_DIMM);
 }
 
 void clientReceiveCallback(int sockfd, char *pdata, int len)
