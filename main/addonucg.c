@@ -22,9 +22,11 @@
 #include "addoncommon.h"
 #include "xpt2046.h"
 #include "ucg_karadio32_fonts.h"
+#include "alarm.h"
 
 #define TAG  "addonucg"
 
+const char *months[] = {"Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Avg", "Sep", "Okt", "Nov", "Dec"};
 
 #define ucg_SetColori(a,b,c,d) ucg_SetColor(a,0,b,c,d)
 
@@ -33,6 +35,10 @@
 #define CTTFONT 250,250,0
 // Body font color
 #define CBODY 110,255,110
+
+#define BCGCOLOR 37, 40, 57
+#define FRGCOLOR 255, 191, 50
+#define SFRGCOLOR 131, 120, 255
 
 #define CBLACK 0,0,0
 #define CWHITE 255,255,255
@@ -296,8 +302,8 @@ void setfont(sizefont size)
 		{
 			case 320:
 			case 240:
-//			ucg_SetFont(&ucg,ucg_font_inr53_mf); 
-			ucg_SetFont(&ucg,ucg_font_osr41_hn); 
+			ucg_SetFont(&ucg,ucg_font_inr53_mf); 
+			//ucg_SetFont(&ucg,ucg_font_osr41_hn); 
 			break;
 			case 128:
 //			ucg_SetFont(&ucg,ucg_font_helvR12_hf); 
@@ -669,12 +675,16 @@ void draw(int i)
 		}
         break;
         default:
-          ucg_SetColori(&ucg,0,0,0); 
- //         ucg_DrawBox(&ucg,0,y*i+z,x,y-ucg_GetFontDescent(&ucg)); 
-//          ucg_DrawBox(&ucg,0,y*i+z,x,y-1); 
-          ucg_DrawBox(&ucg,0,y*i+z-3,x,y); 
-          setColor(i);
-          if (lline[i] != NULL) ucg_DrawString(&ucg,0,y*i+z,0,lline[i]+iline[i]);                
+          yyy = 20*i+45;
+		  if(i == STATION1) yyy += 15;
+		  ucg_SetColor(&ucg,0,BCGCOLOR); 
+          ucg_DrawBox(&ucg,0,yyy,x,25/*-ucg_GetFontDescent(&ucg)*/); 
+		  //ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
+		  ucg_SetColor(&ucg,0,SFRGCOLOR); 
+		  ucg_SetColor(&ucg,1,BCGCOLOR); 
+          //ucg_SetColori(&ucg,0,0,0); 
+          //setColor(i);
+          if (lline[i] != NULL) ucg_DrawString(&ucg,4,yyy,0,lline[i]+iline[i]);                
    }      
 }
 
@@ -825,8 +835,48 @@ void drawVolumeUcg(uint8_t mTscreen)
     }
 }
 
-static  void drawInfo(unsigned timein)
+uint32_t displayedAlarmTime = 999;
+
+void drawAlarm(uint32_t alarmTime){
+	char strdate[23];
+
+	ucg_SetColor(&ucg,0,BCGCOLOR);  
+	ucg_DrawBox(&ucg,0,yy-y,x,y); 
+
+	ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
+	ucg_SetColor(&ucg,0,CWHITE); 
+	ucg_SetColor(&ucg,1,BCGCOLOR); 
+	/*float temp = sht21_getTemperature();
+	int hum = (int)sht21_getHumidity();
+	printf("A: %d:%02d T: %.1fC H: %d%%\n", alarmTime/60, alarmTime%60, temp, hum);*/
+	if(alarmTime == 24*60) {
+		//sprintf(strdate, "T: %.1fC H: %d%%", temp, hum);
+		sprintf(strdate,"IP: %s", getIp());
+	}
+	else sprintf(strdate,"%d:%02d", alarmTime/60, alarmTime%60);
+	//else sprintf(strdate," %d:%02d T:%.1fC H:%d%%", alarmTime/60, alarmTime%60, temp, hum);
+	ucg_DrawString(&ucg,18,yy-18,0,strdate);	
+
+	if(alarmTime != 24*60){
+		ucg_DrawCircle(&ucg, 8, yy-9, 7, UCG_DRAW_ALL);
+		ucg_DrawVLine(&ucg, 8, yy-14, 6);
+		ucg_DrawLine(&ucg, 8, yy-9, 10, yy-6);
+
+		ucg_DrawLine(&ucg, 2, yy-1, 4, yy-3);
+		ucg_DrawLine(&ucg, 12, yy-3, 14, yy-1);
+
+		ucg_DrawLine(&ucg, 1, yy-14, 3, yy-16);
+		ucg_DrawLine(&ucg, 13, yy-16, 15, yy-14);
+	}
+	displayedAlarmTime = alarmTime;
+}
+
+static void drawInfo(struct tm *dt,unsigned timein, uint32_t alarmTime)
 {
+  if (alarmTime != displayedAlarmTime) {
+	  drawAlarm(alarmTime);
+  }
+  
   static unsigned inInfo;
   uint16_t len;
   if (inInfo != timein)
@@ -840,29 +890,12 @@ static  void drawInfo(unsigned timein)
   ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
 
 // Second*  
-  sprintf(strinf,":%02d",dt->tm_sec);
-  len = ucg_GetStrWidth(&ucg,"000");
-  ucg_SetColor(&ucg,1,CBLACK); 
-  ucg_SetColor(&ucg,0,CBODY);
-  ucg_DrawString(&ucg,x-len-8,yy-(2*y),0,strinf); 
+  sprintf(strinf,"%02d",dt->tm_sec);
+  len = ucg_GetStrWidth(&ucg,"00");
+  ucg_SetColor(&ucg,1,BCGCOLOR); 
+  ucg_SetColor(&ucg,0,CWHITE);
+  ucg_DrawString(&ucg,x-len-6,yy-y,0,strinf); 
 
-
-//rssi  
-  sprintf(strinf,"%02d dBm",get_rssi());
-  ucg_SetColor(&ucg,1,CBLACK); 
-  ucg_SetColor(&ucg,0,CTTFONT);
-  ucg_DrawString(&ucg,4,yy-y,0,strinf); 
-
-// Battery 
-  int batPercent = getBatPercent();
-  if (batPercent != -1)
-  {
-	sprintf(strinf,"Batt: %3d%%",batPercent);
-	len = ucg_GetStrWidth(&ucg,strinf);
-	ucg_SetColor(&ucg,1,CBLACK); 
-	ucg_SetColor(&ucg,0,250,batPercent*25/10,0);
-	ucg_DrawString(&ucg,x-len-8,yy-y,0,strinf); 
-  }
   ucg_SetFontMode(&ucg,UCG_FONT_MODE_TRANSPARENT);
 
   inInfo = timein; //to avoid redisplay
@@ -872,34 +905,58 @@ static  void drawInfo(unsigned timein)
 
 void drawTimeUcg(uint8_t mTscreen,unsigned timein)
 {
+  uint32_t alarmTime = getAlarm();
   char strdate[23];
   char strtime[20];
+  uint16_t len;
   LANG scharset;
     sprintf(strtime,"%02d:%02d", dt->tm_hour, dt->tm_min);
     switch (mTscreen){
-      case 1:
+      case 1: // NEW
 		scharset = charset;
 		charset = Latin;
 		setfont(text);
-		sprintf(strdate,"IP: %s", getIp());
-		ucg_ClearScreen(&ucg);
-        ucg_SetColor(&ucg,0,CRED);  
+		ucg_SetColor(&ucg,0,BCGCOLOR);  
+		ucg_DrawBox(&ucg,0,0,x,yy); 
+		ucg_SetColor(&ucg,0,FRGCOLOR); 
+		ucg_DrawBox(&ucg, x - 75, 9, 60, 60);
 		TTitleStr[0] = 0;
 		TTimeStr[0] = 0;
-        ucg_DrawString(&ucg,4,yy-(2*y),0,strdate);	
+        //ucg_DrawString(&ucg,4,yy-(2*y),0,strdate);	
 		charset = scharset;		
-      case 2:
-	    if (getDdmm())
-			sprintf(strdate,"%02d-%02d-%04d", dt->tm_mday, dt->tm_mon+1,  dt->tm_year+1900);
-	    else
-			sprintf(strdate,"%02d-%02d-%04d", dt->tm_mon+1, dt->tm_mday, dt->tm_year+1900);
-		drawTTitleUcg(strdate);
+		
+		markDrawResetUcg(STATION1);
+		markDrawResetUcg(TITLE1);
+		markDrawResetUcg(TITLE11);
+		markDrawResetUcg(TITLE2);
+		markDrawResetUcg(TITLE21);
+      case 2: // REFRESH
+	    setfont(text);
+		if(mline[STATION1]) draw(STATION1);
+		if(mline[TITLE1]) draw(TITLE1);
+		if(mline[TITLE11]) draw(TITLE11);
+		if(mline[TITLE2]) draw(TITLE2);
+		if(mline[TITLE21]) draw(TITLE21);
 		if (strcmp(TTimeStr,strtime)!= 0)
 		{	
+			drawAlarm(alarmTime);
+
+			ucg_SetColor(&ucg,1,FRGCOLOR);		
+			ucg_SetColor(&ucg,0,BCGCOLOR);  
+			// Print date
+			sprintf(strdate,"%d", dt->tm_mday);
+			len = ucg_GetStrWidth(&ucg,strdate);
+			ucg_DrawString(&ucg,(x-45)-(len/2),19,0,strdate);	
+			// Print month
+			sprintf(strdate, "%s", months[dt->tm_mon]);
+			len = ucg_GetStrWidth(&ucg,strdate);
+			ucg_DrawString(&ucg,(x-45)-(len/2),41,0,strdate);	
+			//ucg_SetFont(&ucg,ucg_font_inr38_mf); 
 			setfont(large);
-			ucg_SetColor(&ucg,0,CBODY);		
-			ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
-			ucg_DrawString(&ucg,(x/2)-(ucg_GetStrWidth(&ucg,strtime)/2),yy/3,0,strtime); 
+			ucg_SetColor(&ucg,0,FRGCOLOR);		
+			ucg_SetColor(&ucg,1,BCGCOLOR);  
+
+			ucg_DrawString(&ucg,10,10,0,strtime); 
 			strcpy(TTimeStr,strtime);
 			ucg_SetFontMode(&ucg,UCG_FONT_MODE_TRANSPARENT);
 		}
@@ -908,7 +965,7 @@ void drawTimeUcg(uint8_t mTscreen,unsigned timein)
       default:;
     }
 
-	drawInfo(timein);     	
+	drawInfo(dt, timein, alarmTime);     	
 }
 
 

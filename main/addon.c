@@ -442,7 +442,7 @@ void drawScreen()
 	switch (stateScreen)
 	{
     case smain:  // 
-     drawFrame();
+     drawTime();
       break;
     case svolume:
       drawVolume();
@@ -458,7 +458,7 @@ void drawScreen()
       break;
     default: 
 	  Screen(defaultStateScreen); 
-//	  drawFrame();	  
+	  drawTime();
 	} 
 //	if (mTscreen == MTREFRESH)
 		mTscreen = MTNODISPLAY;
