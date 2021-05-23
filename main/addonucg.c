@@ -23,6 +23,7 @@
 #include "xpt2046.h"
 #include "ucg_karadio32_fonts.h"
 #include "alarm.h"
+#include "sht21.h"
 
 #define TAG  "addonucg"
 
@@ -846,15 +847,13 @@ void drawAlarm(uint32_t alarmTime){
 	ucg_SetFontMode(&ucg,UCG_FONT_MODE_SOLID); 
 	ucg_SetColor(&ucg,0,CWHITE); 
 	ucg_SetColor(&ucg,1,BCGCOLOR); 
-	/*float temp = sht21_getTemperature();
+	float temp = sht21_getTemperature();
 	int hum = (int)sht21_getHumidity();
-	printf("A: %d:%02d T: %.1fC H: %d%%\n", alarmTime/60, alarmTime%60, temp, hum);*/
+	printf("A: %d:%02d T: %.1fC H: %d%%\n", alarmTime/60, alarmTime%60, temp, hum);
 	if(alarmTime == 24*60) {
-		//sprintf(strdate, "T: %.1fC H: %d%%", temp, hum);
-		sprintf(strdate,"IP: %s", getIp());
+		sprintf(strdate, "T: %.1fC H: %d%%", temp, hum);
 	}
-	else sprintf(strdate,"%d:%02d", alarmTime/60, alarmTime%60);
-	//else sprintf(strdate," %d:%02d T:%.1fC H:%d%%", alarmTime/60, alarmTime%60, temp, hum);
+	else sprintf(strdate," %d:%02d T:%.1fC H:%d%%", alarmTime/60, alarmTime%60, temp, hum);
 	ucg_DrawString(&ucg,18,yy-18,0,strdate);	
 
 	if(alarmTime != 24*60){
@@ -894,7 +893,7 @@ static void drawInfo(struct tm *dt,unsigned timein, uint32_t alarmTime)
   len = ucg_GetStrWidth(&ucg,"00");
   ucg_SetColor(&ucg,1,BCGCOLOR); 
   ucg_SetColor(&ucg,0,CWHITE);
-  ucg_DrawString(&ucg,x-len-6,yy-y,0,strinf); 
+  ucg_DrawString(&ucg,x-len-6,yy-18,0,strinf); 
 
   ucg_SetFontMode(&ucg,UCG_FONT_MODE_TRANSPARENT);
 

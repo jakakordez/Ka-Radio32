@@ -64,6 +64,7 @@ Copyright (C) 2017  KaraWin
 
 #include "eeprom.h"
 #include "alarm.h"
+#include "sht21.h"
 
 /////////////////////////////////////////////////////
 ///////////////////////////
@@ -846,6 +847,21 @@ void app_main()
 
     init_hardware(); 
 	
+	ESP_LOGI(TAG, "Initializing I2C for SHT21");
+	i2c_config_t sht21_conf;
+    sht21_conf.mode = I2C_MODE_MASTER;
+    sht21_conf.sda_io_num = GPIO_NUM_33;
+    sht21_conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    sht21_conf.scl_io_num = GPIO_NUM_32;
+    sht21_conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+    sht21_conf.master.clk_speed = 100000;
+    //ESP_ERROR_CHECK
+    esp_err_t res = i2c_param_config(I2C_MASTER_NUM, &sht21_conf);
+	ESP_LOGD(TAG, "i2c_param_config %d", res);
+    ESP_LOGD(TAG, "SHT21 i2c_driver_install %d", I2C_MASTER_NUM);
+    //ESP_ERROR_CHECK
+    res = i2c_driver_install(I2C_MASTER_NUM, sht21_conf.mode, 0, 0, 0);
+	ESP_LOGD(TAG, "i2c_driver_install %d", res);
 	
 	//ESP_LOGE(TAG,"Corrupt1 %d",heap_caps_check_integrity(MALLOC_CAP_DMA,1));
 	
@@ -939,6 +955,8 @@ void app_main()
 	setIvol( g_device->vol);
 	ESP_LOGI(TAG, "Volume set to %d",g_device->vol);
 		
+	printf("SHT21 temperature: %f\n", sht21_getTemperature());
+	printf("SHT21 humidity: %f\n", sht21_getHumidity());
 	
 	// queue for events of the sleep / wake and Ms timers
 	event_queue = xQueueCreate(30, sizeof(queue_event_t));

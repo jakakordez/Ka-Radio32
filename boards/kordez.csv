@@ -25,8 +25,8 @@ P_BTN0_C,data,u8,255
 P_BTN1_A,data,u8,255
 P_BTN1_B,data,u8,255
 P_BTN1_C,data,u8,255
-P_I2C_SCL,data,u8,14
-P_I2C_SDA,data,u8,13
+P_I2C_SCL,data,u8,32
+P_I2C_SDA,data,u8,33
 P_I2C_RST,data,u8,2
 P_LCD_CS,data,u8,13
 P_LCD_A0,data,u8,14
